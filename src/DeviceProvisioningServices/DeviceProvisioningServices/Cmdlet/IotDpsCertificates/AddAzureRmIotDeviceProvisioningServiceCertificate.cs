@@ -34,6 +34,7 @@ namespace Microsoft.Azure.Commands.Management.DeviceProvisioningServices
         private const string ResourceParameterSet = "ResourceSet";
         private const string InputObjectParameterSet = "InputObjectSet";
         private const string ResourceIdParameterSet = "ResourceIdSet";
+        private string FileWithPath;
 
         [Parameter(
             Position = 0,
@@ -92,17 +93,17 @@ namespace Microsoft.Azure.Commands.Management.DeviceProvisioningServices
             Position = 2,
             Mandatory = true,
             ParameterSetName = InputObjectParameterSet,
-            HelpMessage = "base-64 representation of X509 certificate .cer file or .pem file path")]
+            HelpMessage = "Name of a .cer file (x509 certificate), .pem file (x509 certificate in PEM format), or base-64 representation of X509 certificate")]
         [Parameter(
             Position = 2,
             Mandatory = true,
             ParameterSetName = ResourceIdParameterSet,
-            HelpMessage = "base-64 representation of X509 certificate .cer file or .pem file path")]
+            HelpMessage = "Name of a .cer file (x509 certificate), .pem file (x509 certificate in PEM format), or base-64 representation of X509 certificate")]
         [Parameter(
             Position = 3,
             Mandatory = true,
             ParameterSetName = ResourceParameterSet,
-            HelpMessage = "base-64 representation of X509 certificate .cer file or .pem file path")]
+            HelpMessage = "Name of a .cer file (x509 certificate), .pem file (x509 certificate in PEM format), or base-64 representation of X509 certificate")]
         [ValidateNotNullOrEmpty]
         public string Path { get; set; }
 
@@ -114,7 +115,7 @@ namespace Microsoft.Azure.Commands.Management.DeviceProvisioningServices
 
         public override void ExecuteCmdlet()
         {
-            Path = ResolveUserPath(Path);
+            FileWithPath = ResolveUserPath(Path);
             if (ShouldProcess(Name, DPSResources.AddCertificate))
             {
                 switch (ParameterSetName)
@@ -146,15 +147,15 @@ namespace Microsoft.Azure.Commands.Management.DeviceProvisioningServices
         private void AddIotDpsCertificate()
         {
             string certificate = string.Empty;
-            FileInfo fileInfo = new FileInfo(this.Path);
+            FileInfo fileInfo = new FileInfo(this.FileWithPath);
             switch (fileInfo.Extension.ToLower(CultureInfo.InvariantCulture))
             {
                 case ".cer":
-                    var certificateByteContent = AzureSession.Instance.DataStore.ReadFileAsBytes(this.Path);
+                    var certificateByteContent = AzureSession.Instance.DataStore.ReadFileAsBytes(this.FileWithPath);
                     certificate = Convert.ToBase64String(certificateByteContent);
                     break;
                 case ".pem":
-                    certificate = AzureSession.Instance.DataStore.ReadFileAsText(this.Path);
+                    certificate = AzureSession.Instance.DataStore.ReadFileAsText(this.FileWithPath);
                     break;
                 default:
                     certificate = this.Path;
