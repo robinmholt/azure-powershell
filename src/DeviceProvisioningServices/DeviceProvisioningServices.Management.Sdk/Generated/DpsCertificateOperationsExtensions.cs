@@ -99,9 +99,9 @@ namespace Microsoft.Azure.Management.DeviceProvisioningServices
             /// Base-64 representation of the X509 leaf certificate .cer file or just .pem
             /// file content.
             /// </param>
-            public static CertificateResponse CreateOrUpdate(this IDpsCertificateOperations operations, string resourceGroupName, string provisioningServiceName, string certificateName, string ifMatch = default(string), string certificate = default(string))
+            public static CertificateResponse CreateOrUpdate(this IDpsCertificateOperations operations, string resourceGroupName, string provisioningServiceName, string certificateName, string ifMatch = default(string), string certificate = default(string), bool isVerified = false)
             {
-                return operations.CreateOrUpdateAsync(resourceGroupName, provisioningServiceName, certificateName, ifMatch, certificate).GetAwaiter().GetResult();
+                return operations.CreateOrUpdateAsync(resourceGroupName, provisioningServiceName, certificateName, ifMatch, certificate, isVerified).GetAwaiter().GetResult();
             }
 
             /// <summary>
@@ -133,9 +133,9 @@ namespace Microsoft.Azure.Management.DeviceProvisioningServices
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<CertificateResponse> CreateOrUpdateAsync(this IDpsCertificateOperations operations, string resourceGroupName, string provisioningServiceName, string certificateName, string ifMatch = default(string), string certificate = default(string), CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<CertificateResponse> CreateOrUpdateAsync(this IDpsCertificateOperations operations, string resourceGroupName, string provisioningServiceName, string certificateName, string ifMatch = default(string), string certificate = default(string), bool isVerified = false, CancellationToken cancellationToken = default(CancellationToken))
             {
-                using (var _result = await operations.CreateOrUpdateWithHttpMessagesAsync(resourceGroupName, provisioningServiceName, certificateName, ifMatch, certificate, null, cancellationToken).ConfigureAwait(false))
+                using (var _result = await operations.CreateOrUpdateWithHttpMessagesAsync(resourceGroupName, provisioningServiceName, certificateName, ifMatch, certificate, isVerified, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }

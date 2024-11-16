@@ -306,7 +306,7 @@ namespace Microsoft.Azure.Management.DeviceProvisioningServices
         /// <return>
         /// A response object containing the response body and response headers.
         /// </return>
-        public async Task<AzureOperationResponse<CertificateResponse>> CreateOrUpdateWithHttpMessagesAsync(string resourceGroupName, string provisioningServiceName, string certificateName, string ifMatch = default(string), string certificate = default(string), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<AzureOperationResponse<CertificateResponse>> CreateOrUpdateWithHttpMessagesAsync(string resourceGroupName, string provisioningServiceName, string certificateName, string ifMatch = default(string), string certificate = default(string), bool isVerified = false, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (Client.ApiVersion == null)
             {
@@ -340,6 +340,8 @@ namespace Microsoft.Azure.Management.DeviceProvisioningServices
             {
                 certificateDescription.Certificate = certificate;
             }
+	    certificateDescription.IsVerified = isVerified;
+
             // Tracing
             bool _shouldTrace = ServiceClientTracing.IsEnabled;
             string _invocationId = null;
@@ -365,7 +367,7 @@ namespace Microsoft.Azure.Management.DeviceProvisioningServices
             List<string> _queryParameters = new List<string>();
             if (Client.ApiVersion != null)
             {
-                _queryParameters.Add(string.Format("api-version={0}", System.Uri.EscapeDataString(Client.ApiVersion)));
+                _queryParameters.Add(string.Format("api-version={0}", System.Uri.EscapeDataString("2020-03-01")));
             }
             if (_queryParameters.Count > 0)
             {

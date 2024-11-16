@@ -49,5 +49,10 @@ namespace Microsoft.Azure.Management.DeviceProvisioningServices.Models
         [JsonProperty(PropertyName = "certificate")]
         public string Certificate { get; set; }
 
+        /// <summary>
+        /// Gets or sets the indicator of whether the certificate is verified.
+        /// </summary>
+        [JsonProperty(PropertyName = "isVerified")]
+        public bool IsVerified { get; set; } = false;
     }
 }

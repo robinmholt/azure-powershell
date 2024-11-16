@@ -112,6 +112,11 @@ namespace Microsoft.Azure.Commands.Management.DeviceProvisioningServices
         [ValidateNotNullOrEmpty]
         public string Etag { get; set; }
 
+	[Parameter(
+            Mandatory = false,
+            HelpMessage = "Set the isVerified property on the certificate upon upload.")]
+	public bool IsVerified { get; set; } = false;
+
         public override void ExecuteCmdlet()
         {
             Path = ResolveUserPath(Path);
@@ -167,7 +172,14 @@ namespace Microsoft.Azure.Commands.Management.DeviceProvisioningServices
             certificateBodyDescription.Certificate = certificate;
 
             CertificateResponse certificateResponse;
-            certificateResponse = this.IotDpsClient.DpsCertificate.CreateOrUpdate(this.ResourceGroupName, this.Name, this.CertificateName, this.Etag, certificateBodyDescription.Certificate);
+            certificateResponse = this.IotDpsClient.DpsCertificate.CreateOrUpdate(
+                resourceGroupName: this.ResourceGroupName,
+                provisioningServiceName: this.Name,
+                certificateName: this.CertificateName,
+                ifMatch: this.Etag,
+                certificate: certificateBodyDescription.Certificate,
+                isVerified: IsVerified
+            );
 
             this.WriteObject(IotDpsUtils.ToPSCertificateResponse(certificateResponse));
         }
