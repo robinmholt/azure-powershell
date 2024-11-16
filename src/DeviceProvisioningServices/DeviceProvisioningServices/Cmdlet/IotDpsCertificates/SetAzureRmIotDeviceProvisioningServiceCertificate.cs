@@ -34,6 +34,7 @@ namespace Microsoft.Azure.Commands.Management.DeviceProvisioningServices
         private const string ResourceParameterSet = "ResourceSet";
         private const string InputObjectParameterSet = "InputObjectSet";
         private const string ResourceIdParameterSet = "ResourceIdSet";
+        private string FileWithPath;
 
         [Parameter(
             Position = 0,
@@ -95,23 +96,23 @@ namespace Microsoft.Azure.Commands.Management.DeviceProvisioningServices
             Position = 1,
             Mandatory = true,
             ParameterSetName = InputObjectParameterSet,
-            HelpMessage = "base-64 representation of X509 certificate .cer file or .pem file path")]
+            HelpMessage = "Name of a .cer file (x509 certificate), .pem file (x509 certificate in PEM format), or base-64 representation of X509 certificate")]
         [Parameter(
             Position = 2,
             Mandatory = true,
             ParameterSetName = ResourceIdParameterSet,
-            HelpMessage = "base-64 representation of X509 certificate .cer file or .pem file path")]
+            HelpMessage = "Name of a .cer file (x509 certificate), .pem file (x509 certificate in PEM format), or base-64 representation of X509 certificate")]
         [Parameter(
             Position = 4,
             Mandatory = true,
             ParameterSetName = ResourceParameterSet,
-            HelpMessage = "base-64 representation of X509 certificate .cer file or .pem file path")]
+            HelpMessage = "Name of a .cer file (x509 certificate), .pem file (x509 certificate in PEM format), or base-64 representation of X509 certificate")]
         [ValidateNotNullOrEmpty]
         public string Path { get; set; }
 
         public override void ExecuteCmdlet()
         {
-            Path = ResolveUserPath(Path);
+            FileWithPath = ResolveUserPath(Path);
             if (ShouldProcess(Name, DPSResources.SetCertificate))
             {
                 switch (ParameterSetName)
@@ -144,15 +145,15 @@ namespace Microsoft.Azure.Commands.Management.DeviceProvisioningServices
         private void SetIotDpsCertificate()
         {
             string certificate = string.Empty;
-            FileInfo fileInfo = new FileInfo(this.Path);
+            FileInfo fileInfo = new FileInfo(this.FileWithPath);
             switch (fileInfo.Extension.ToLower(CultureInfo.InvariantCulture))
             {
                 case ".cer":
-                    var certificateByteContent = AzureSession.Instance.DataStore.ReadFileAsBytes(this.Path);
+                    var certificateByteContent = AzureSession.Instance.DataStore.ReadFileAsBytes(this.FileWithPath);
                     certificate = Convert.ToBase64String(certificateByteContent);
                     break;
                 case ".pem":
-                    certificate = AzureSession.Instance.DataStore.ReadFileAsText(this.Path);
+                    certificate = AzureSession.Instance.DataStore.ReadFileAsText(this.FileWithPath);
                     break;
                 default:
                     certificate = this.Path;
@@ -161,10 +162,13 @@ namespace Microsoft.Azure.Commands.Management.DeviceProvisioningServices
 
             certificate = Encoding.UTF8.GetString(Encoding.UTF8.GetBytes(certificate));
 
-            VerificationCodeRequest verificationCodeRequest = new VerificationCodeRequest();
-            verificationCodeRequest.Certificate = certificate;
-
-            CertificateResponse certificateResponse = this.IotDpsClient.DpsCertificate.VerifyCertificate(this.CertificateName, this.Etag,this.ResourceGroupName, this.Name, verificationCodeRequest.Certificate);
+            CertificateResponse certificateResponse = this.IotDpsClient.DpsCertificate.VerifyCertificate(
+                certificateName: this.CertificateName,
+                ifMatch: this.Etag,
+                resourceGroupName: this.ResourceGroupName,
+                provisioningServiceName: this.Name,
+                certificate: certificate
+            );
             this.WriteObject(IotDpsUtils.ToPSCertificateResponse(certificateResponse));
         }
     }
